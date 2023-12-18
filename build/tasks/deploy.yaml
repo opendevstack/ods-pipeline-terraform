@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: ods-pipeline-terraform-deploy
+spec:
+  description: |
+    Plan and apply with terraform.
+
+    See https://github.com/opendevstack/ods-pipeline-terraform/blob/v{{.Version}}/docs/terraform.adoc
+
+    And [Terraform kubernetes Backend](https://developer.hashicorp.com/terraform/language/settings/backends/kubernetes)
+
+  params:
+    - name: terraform-dir
+      description: Directory containing terraform files (in the Terraform language). These define the configuration to be applied.
+      type: string
+      default: ./terraform
+    - name: target-environment 
+      description: Terraform state file suffix (tfstate-default-{target-environment})
+      type: string
+      default: 'dev'
+    - name: apply-extra-args
+      description: Extra arguments to pass to terraform apply.
+      type: string
+      default: ''
+    - name: plan-extra-args
+      description: Extra arguments to pass to terraform plan.
+      type: string
+      default: ''
+    - name: plan-only
+      description: |
+        If set to true, the task will do a terraform plan, and then stop.
+      type: string
+      default: 'false'
+    - name: verbose
+      description: More verbose output. DEBUG also implies verbose
+      type: string
+      default: 'false'
+  steps:
+    - name: terraform-from-repo
+      # Image is built from build/package/Dockerfile.terraform.
+      image: '{{.ImageRepository}}/terraform:{{.Version}}'
+      # envFrom:  -- is not working with variable substitutionq
+      #   - secretRef:
+      #       name: terraform-envs-$(params.target-environment}
+      env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              key: debug
+              name: ods-pipeline
+        - name: HOME
+          value: '/tekton/home'
+      resources: {}
+      script: |
+        # deploy-terraform is built from /cmd/deploy-terraform/main.go.
+        deploy-terraform \
+          -terraform-dir=$(params.terraform-dir) \
+          -target-environment=$(params.target-environment) \
+          -apply-extra-args=$(params.apply-extra-args) \
+          -plan-extra-args=$(params.plan-extra-args) \
+          -plan-only=$(params.plan-only) \
+          -verbose=$(params.verbose)
+      volumeMounts:
+        - mountPath: /etc/ssl/certs/private-cert.pem
+          name: private-cert
+          readOnly: true
+          subPath: tls.crt
+      workingDir: $(workspaces.source.path)
+  volumes:
+    - name: private-cert
+      secret:
+        secretName: ods-private-cert
+        optional: true
+  workspaces:
+    - name: source
