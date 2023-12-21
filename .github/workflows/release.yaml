@@ -7,7 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_BASE: ${{ github.repository }}
-  IMAGE_NAME: helm
+  IMAGE_NAME: terraform
 
 jobs:
   build:
