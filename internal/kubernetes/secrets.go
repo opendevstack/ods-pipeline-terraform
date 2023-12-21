@@ -35,23 +35,3 @@ func GetSecrets(clientset k8s.Interface, namespace string, secretName string) (m
 	}
 	return secrets, nil
 }
-
-func GetSecretKey(clientset k8s.Interface, namespace, secretName, key string) (string, error) {
-
-	log.Printf("Get secret %s", secretName)
-
-	secret, err := clientset.CoreV1().
-		Secrets(namespace).
-		Get(context.TODO(), secretName, metav1.GetOptions{})
-
-	if err != nil {
-		return "", err
-	}
-
-	v, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("key %s not found", key)
-	}
-
-	return string(v), err
-}

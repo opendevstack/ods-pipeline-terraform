@@ -103,9 +103,6 @@ func setupEnvFromSecret() TerraformStep {
 				return d, err
 			}
 			d.secretEnvVars = envVars
-			// for k, v := range d.secretEnvVars {
-			// 	d.logger.Infof("%s=%s", k, v)
-			// }
 			d.logger.Infof("Secret env variables: [%s]", strings.Join(getKeys(envVars), ","))
 		} else {
 			d.logger.Infof("env-from-secret is %s: skipping deriving env variables from kubernetes secret")

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/google/shlex"
@@ -38,15 +37,6 @@ func (d *deployTerraform) terraformPlanInSync(args []string, env map[string]stri
 func (d *deployTerraform) assembleInitWithK8sBackendArgsEnv() (args []string, env map[string]string, sensitive []string, err error) {
 	args = []string{
 		"init",
-	}
-	// this appears to not be working so we need a backend.tf file.
-	backendConfigs := []string{
-		// "type=kubernetes",
-		// fmt.Sprintf("secret_suffix=%s", d.opts.targetEnvironment),
-		// "in_cluster_config=true",
-	}
-	for _, config := range backendConfigs {
-		args = append(args, fmt.Sprintf("-backend-config=%s", strconv.Quote(config)))
 	}
 	commonArgs := d.commonTerraformArgs()
 	env = d.commonTerraformEnv()

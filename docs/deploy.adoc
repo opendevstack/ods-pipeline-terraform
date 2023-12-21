@@ -4,14 +4,14 @@
 
 Deploy Infrastructure with Terraform.
 
-This tasks supports applying a Terraform configuration.
+This task supports applying a Terraform configuration.
 
 NOTICE: This is experimental and anything is subject to change or even removal. 
 
 The Terraform configuration is associated with a state file unique to the
 target-environment. 
 
-This tasks provides a terraform kubernetes backend (see https://developer.hashicorp.com/terraform/language/settings/backends/kubernetes). The `secret_suffix` used is `component`-`target-environment`.
+This task provides a terraform kubernetes backend (see https://developer.hashicorp.com/terraform/language/settings/backends/kubernetes). The `secret_suffix` used is `component`-`target-environment`.
 In the future other backends shall be supported as needed where S3 support is an obvious candidate
 
 This task runs the following terraform commands in sequence:

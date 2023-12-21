@@ -124,34 +124,6 @@ func newK8sClient(t *testing.T) *kubernetes.Clientset {
 	return kubernetesClientset
 }
 
-// func createSampleAppPrivateKeySecret(t *testing.T, clientset *kubernetes.Clientset, namespace string) ttr.TaskRunOpt {
-// 	return func(c *ttr.TaskRunConfig) error {
-// 		secret, err := readPrivateKeySecret()
-// 		if err != nil {
-// 			return err
-// 		}
-// 		t.Logf("Creating secret %q in namespace %q ...", secret.Name, namespace)
-// 		_, err = clientset.CoreV1().
-// 			Secrets(namespace).
-// 			Create(context.TODO(), secret, metav1.CreateOptions{})
-// 		return err
-// 	}
-// }
-
-// func readPrivateKeySecret() (*corev1.Secret, error) {
-// 	bytes, err := os.ReadFile("../testdata/fixtures/tasks/secret.yaml")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	var secretSpec corev1.Secret
-// 	err = yaml.Unmarshal(bytes, &secretSpec)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &secretSpec, nil
-// }
-
 func createRoleBindingsOrFatal(t *testing.T, clientset *kubernetes.Clientset, ctxtNamespace string) (rb *rbacv1.RoleBinding, cleanup func()) {
 	rb, err := createRoleBindings(clientset, ctxtNamespace)
 	if err != nil {
@@ -211,10 +183,6 @@ func createSecrets(clientset *kubernetes.Clientset, ctxtNamespace string, vars m
 		},
 		StringData: vars,
 	}
-	// for key, value := range secret.StringData {
-	// 	secret.StringData[key] = base64.StdEncoding.EncodeToString([]byte(value))
-	// }
-
 	createdSecret, err := clientset.CoreV1().Secrets(ctxtNamespace).Create(
 		context.Background(), secret, metav1.CreateOptions{})
 
