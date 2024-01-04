@@ -135,7 +135,7 @@ func TestApplyTerraformTaskWithDifferentDir(t *testing.T) {
 			fmt.Println(dir)
 			ott.AssertFileContentContains(t,
 				dir,
-				filepath.Join(pipelinectxt.DeploymentsPath, fmt.Sprintf("plan-%s.txt", "dev")),
+				filepath.Join(pipelinectxt.DeploymentsPath, fmt.Sprintf("%s-plan-%s.txt", tfDir, "dev")),
 				"Terraform used the selected providers to generate the following execution",
 				"plan. Resource actions are indicated with the following symbols:",
 				"  + create",

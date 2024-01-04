@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	tokenFile       = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	subTerraformDir = "terraform"
+	tokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 )
 
 type TerraformStep func(d *deployTerraform) (*deployTerraform, error)
@@ -163,8 +162,8 @@ func detectDeploymentArtifacts() TerraformStep {
 }
 
 func (d *deployTerraform) isTerraformDir(dir string) bool {
-	if _, err := os.Stat(subTerraformDir); os.IsNotExist(err) {
-		d.logger.Debugf("No terraform directory found at %s: %w", subTerraformDir, err)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		d.logger.Debugf("No terraform directory found at %s: %w", dir, err)
 		return false
 	}
 	// perhaps additional checks make sense to see whether dir is a terraform dir

@@ -34,6 +34,10 @@ spec:
         If set to true, the task will do a terraform plan, and then stop.
       type: string
       default: 'false'
+    - name: env-from-secret
+      description: Whether to derive env variables from the k8s secret terraform-var-{target-environment}.
+      type: string
+      default: 'true'
     - name: verbose
       description: More verbose output. DEBUG also implies verbose
       type: string
@@ -62,6 +66,7 @@ spec:
           -apply-extra-args=$(params.apply-extra-args) \
           -plan-extra-args=$(params.plan-extra-args) \
           -plan-only=$(params.plan-only) \
+          -env-from-secret=$(params.env-from-secret) \
           -verbose=$(params.verbose)
       volumeMounts:
         - mountPath: /etc/ssl/certs/private-cert.pem
