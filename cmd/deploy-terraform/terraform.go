@@ -116,9 +116,11 @@ func (d *deployTerraform) commonTerraformArgs() []string {
 		"-input=false",
 		"-no-color",
 	}
-	if d.opts.debug {
-		args = append([]string{"-debug"}, args...)
-	}
+	// https://support.hashicorp.com/hc/en-us/articles/360001113727-Enabling-trace-level-logs-in-Terraform-CLI-Cloud-or-Enterprise
+	// todo: is there some kind of debug flag?
+	// if d.opts.debug {
+	// 	args = append([]string{"-debug"}, args...)
+	// }
 	return args
 }
 
