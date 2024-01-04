@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -34,7 +35,7 @@ func TestPlanTerraformTask(t *testing.T) {
 				"verbose":   "true",
 			},
 		),
-		ott.WithGitSourceWorkspace(t, "../testdata/workspaces/terraform-sample", namespaceConfig.Name),
+		withWorkspace(t, "terraform-sample"),
 		ttr.AfterRun(func(config *ttr.TaskRunConfig, run *tekton.TaskRun, logs bytes.Buffer) {
 			dir := config.WorkspaceConfigs["source"].Dir
 			fmt.Println(dir)
@@ -79,7 +80,56 @@ func TestApplyTerraformTask(t *testing.T) {
 				"verbose": "true",
 			},
 		),
-		ott.WithGitSourceWorkspace(t, "../testdata/workspaces/terraform-sample", namespaceConfig.Name),
+		withWorkspace(t, "terraform-sample"),
+		ttr.AfterRun(func(config *ttr.TaskRunConfig, run *tekton.TaskRun, logs bytes.Buffer) {
+			dir := config.WorkspaceConfigs["source"].Dir
+			fmt.Println(dir)
+			ott.AssertFileContentContains(t,
+				dir,
+				filepath.Join(pipelinectxt.DeploymentsPath, fmt.Sprintf("plan-%s.txt", "dev")),
+				"Terraform used the selected providers to generate the following execution",
+				"plan. Resource actions are indicated with the following symbols:",
+				"  + create",
+				"",
+				"Terraform will perform the following actions:",
+				"",
+				"  # tfcoremock_simple_resource.example will be created",
+				"  + resource \"tfcoremock_simple_resource\" \"example\" {",
+				"+ bool    = true",
+				"+ float   = 42.23",
+				"+ id      = \"my-simple-resource\"",
+				"+ integer = 11",
+				"+ number  = 42",
+				"+ string  = \"Hello ods-pipeline-terraform!\"",
+				"}",
+				"",
+				"Plan: 1 to add, 0 to change, 0 to destroy.",
+			)
+		}),
+	); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestApplyTerraformTaskWithDifferentDir(t *testing.T) {
+	k8sClient := newK8sClient(t)
+	_, nsCleanup := createRoleBindingsOrFatal(t, k8sClient, namespaceConfig.Name)
+	defer nsCleanup()
+	_, secretCleanup := createSecretsOrFatal(t, k8sClient, namespaceConfig.Name, map[string]string{
+		"TF_VAR_hello": "Hello ods-pipeline-terraform!",
+	})
+	tfDir := "tf"
+	defer secretCleanup()
+	if err := runTask(
+		ttr.WithStringParams(
+			map[string]string{
+				"terraform-dir": fmt.Sprintf("./%s", tfDir),
+				"verbose":       "true",
+			},
+		),
+		withWorkspace(t, "terraform-sample", func(c *ttr.WorkspaceConfig) error {
+			renameTerraformDir(t, c.Dir, "terraform", tfDir)
+			return nil
+		}),
 		ttr.AfterRun(func(config *ttr.TaskRunConfig, run *tekton.TaskRun, logs bytes.Buffer) {
 			dir := config.WorkspaceConfigs["source"].Dir
 			fmt.Println(dir)
@@ -187,4 +237,21 @@ func createSecrets(clientset *kubernetes.Clientset, ctxtNamespace string, vars m
 		context.Background(), secret, metav1.CreateOptions{})
 
 	return createdSecret, err
+}
+
+func renameTerraformDir(t *testing.T, wsDir string, originalDir, targetDir string) {
+	err := os.Rename(
+		filepath.Join(wsDir, originalDir),
+		filepath.Join(wsDir, targetDir),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func withWorkspace(t *testing.T, dir string, opts ...ttr.WorkspaceOpt) ttr.TaskRunOpt {
+	return ott.WithGitSourceWorkspace(
+		t, filepath.Join("../testdata/workspaces", dir), namespaceConfig.Name,
+		opts...,
+	)
 }
