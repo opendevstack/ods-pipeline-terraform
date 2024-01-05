@@ -8,7 +8,7 @@ spec:
   description: |
     Plan and apply with terraform.
 
-    See https://github.com/opendevstack/ods-pipeline-terraform/blob/v0.1.0/docs/terraform.adoc
+    See https://github.com/opendevstack/ods-pipeline-terraform/blob/v0.2.0/docs/terraform.adoc
 
     And [Terraform kubernetes Backend](https://developer.hashicorp.com/terraform/language/settings/backends/kubernetes)
 
@@ -45,7 +45,7 @@ spec:
   steps:
     - name: terraform-from-repo
       # Image is built from build/package/Dockerfile.terraform.
-      image: 'ghcr.io/opendevstack/ods-pipeline-terraform/terraform:0.1.0'
+      image: 'ghcr.io/opendevstack/ods-pipeline-terraform/terraform:0.2.0'
       # envFrom:  -- is not working with variable substitutionq
       #   - secretRef:
       #       name: terraform-envs-$(params.target-environment}
