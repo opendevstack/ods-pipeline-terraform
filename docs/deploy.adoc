@@ -24,7 +24,13 @@ This task runs the following terraform commands in sequence:
 
 It is assumed that secrets needed to connected to the infrastructure managed by terraform are provided with environment variables. The task by default expects a kubernetes secret which is used to derived the needed environment variables from. This can be switched off by setting `env-from-secret` to "false" in case variables are already provided by other means (such as a podTemplate) or not needed.
 
-This mechanism is also the means to provide terraform input variables.
+This mechanism is the means to provide secret terraform input variables.
+
+Based on the target environment, additional `.tfvar` files are added automatically via input option  
+to the invocation of the `terraform` plan/apply command if they are present in the terraform directory:
+
+- `terraform.<ENV>.tfvar`: a `.tfvar` file named after the target environment.
+- `terraform.<ENV>.tfvar.json`: a `.tfvar` file in json format named after the target environment.
 
 If the pipeline runs for a repository defining subrepos in its `ods.y(a)ml`
 file, then any terraform configs in those subrepos are processed as well. Note that parameters definitions considered are only the ones defined in the repository for which the pipeline

@@ -61,15 +61,17 @@ func (d *deployTerraform) assemblePlanArgsEnv() (args []string, env map[string]s
 	if err != nil {
 		return empty, emptyEnv, empty, fmt.Errorf("parse plan-extra-args (%s): %s", d.opts.planExtraArgs, err)
 	}
-	args = append(args, planExtraArgs...)
 	commonArgs := d.commonTerraformPlanApplyArgs()
+	args = append(args, commonArgs...)
+	args = append(args, planExtraArgs...)
+
 	env = d.commonTerraformPlanApplyEnv()
 	sensitive = []string{}
 	for k, v := range d.secretEnvVars {
 		env[k] = v
 		sensitive = append(sensitive, v)
 	}
-	return append(args, commonArgs...), env, sensitive, nil
+	return args, env, sensitive, nil
 }
 
 // assembleApplyArgs creates a slice of arguments for "terraform apply".
@@ -84,15 +86,16 @@ func (d *deployTerraform) assembleApplyArgsEnv() (args []string, env map[string]
 	if err != nil {
 		return empty, emptyEnv, empty, fmt.Errorf("parse apply-extra-args (%s): %s", d.opts.applyExtraArgs, err)
 	}
-	args = append(args, applyExtraArgs...)
 	commonArgs := d.commonTerraformPlanApplyArgs()
+	args = append(args, commonArgs...)
+	args = append(args, applyExtraArgs...)
 	env = d.commonTerraformPlanApplyEnv()
 	sensitive = []string{}
 	for k, v := range d.secretEnvVars {
 		env[k] = v
 		sensitive = append(sensitive, v)
 	}
-	return append(args, commonArgs...), env, sensitive, nil
+	return args, env, sensitive, nil
 }
 
 // commonTerraformPlanApplyArgs returns arguments common to "terraform upgrade" and "terraform diff upgrade".
@@ -102,6 +105,9 @@ func (d *deployTerraform) commonTerraformPlanApplyArgs() []string {
 		"-compact-warnings",
 	}
 	args = append(args, apArgs...)
+	for _, vf := range d.varFiles {
+		args = append(args, fmt.Sprintf("-var-file=%s", vf))
+	}
 	return args
 }
 
