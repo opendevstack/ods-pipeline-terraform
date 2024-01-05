@@ -10,6 +10,17 @@ listed in the changelog.
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-1-5
+
+### Added
+
+- Support env specific tfvars ([#12](https://github.com/opendevstack/ods-pipeline-terraform/issues/12))
+
+### Fixed
+
+- Fixed parameter terraform-dir not working if not default ([#9](https://github.com/opendevstack/ods-pipeline-terraform/issues/9))
+
+
 ## [0.1.0] - 2023-12-18
 
 Initial version.
