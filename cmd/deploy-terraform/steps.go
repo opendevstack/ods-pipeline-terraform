@@ -110,6 +110,27 @@ func setupEnvFromSecret() TerraformStep {
 	}
 }
 
+func collectVarFiles() TerraformStep {
+	return func(d *deployTerraform) (*deployTerraform, error) {
+		d.logger.Infof("Collecting Terraform .tfvar files ...")
+		d.varFiles = []string{}
+		varFilesCandidateNames := []string{
+			fmt.Sprintf("terraform.%s.tfvars", d.opts.targetEnvironment),
+			fmt.Sprintf("terraform.%s.tfvars.json", d.opts.targetEnvironment),
+		}
+		for _, vfcn := range varFilesCandidateNames {
+			vfc := filepath.Join(d.opts.terraformDir, vfcn)
+			if _, err := os.Stat(vfc); os.IsNotExist(err) {
+				d.logger.Infof("%s is not present, skipping.", vfc)
+			} else {
+				d.logger.Infof("%s is present, adding.", vfc)
+				d.varFiles = append(d.varFiles, vfcn)
+			}
+		}
+		return d, nil
+	}
+}
+
 func getKeys(m map[string]string) []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {

@@ -73,6 +73,7 @@ type deployTerraform struct {
 	secretName          string
 	secretEnvVars       map[string]string
 	pluginCacheDir      string
+	varFiles            []string
 	subrepos            []fs.DirEntry
 	deploymentArtifacts []string
 	tfConfigs           []terraformConfig
@@ -126,6 +127,7 @@ func main() {
 	err := (dt).runSteps(
 		setupContext(),
 		setupEnvFromSecret(),
+		collectVarFiles(),
 		renderBackend(),
 		detectSubrepos(),
 		detectDeploymentArtifacts(),
